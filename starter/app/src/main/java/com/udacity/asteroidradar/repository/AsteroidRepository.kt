@@ -10,7 +10,6 @@ import com.udacity.asteroidradar.api.NasaApiStatus
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidDbModel
 import com.udacity.asteroidradar.database.AsteroidRadarDatabase
-import com.udacity.asteroidradar.main.AsteroidFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,38 +19,57 @@ import java.util.*
 class AsteroidRepository(private val database: AsteroidRadarDatabase) {
 
     private val today = convertDateLong(Calendar.getInstance().time)
-    private val _status = MutableLiveData<NasaApiStatus>()
-    val status: LiveData<NasaApiStatus>
-        get() = _status
+    private val _fetchDataStatus = MutableLiveData<NasaApiStatus>()
+    val fetchDataStatus: LiveData<NasaApiStatus>
+        get() = _fetchDataStatus
+    private val _podStatus = MutableLiveData<NasaApiStatus>()
+    val podStatus: LiveData<NasaApiStatus>
+        get() = _podStatus
     private val _pod = MutableLiveData<PictureOfDay>()
     val pod: LiveData<PictureOfDay>
         get() = _pod
 
     suspend fun refreshAsteroidsData() {
+        var calendar = Calendar.getInstance()
+        val startDate = convertDateString(calendar.time)
+        calendar.add(Calendar.DATE, 7)
+        val endDate = convertDateString(calendar.time)
+        downloadData(startDate, endDate)
+    }
+
+    suspend fun downloadTodayData() {
+        var calendar = Calendar.getInstance()
+        val startDate = convertDateString(calendar.time)
+        downloadData(startDate, "")
+    }
+
+    private suspend fun downloadData(startDate: String, endDate: String) {
         withContext(Dispatchers.IO) {
             //Get week data
-            var calendar = Calendar.getInstance()
-            val startDate = convertDateString(calendar.time)
-            calendar.add(Calendar.DATE, 7)
-            val endDate = convertDateString(calendar.time)
-            var deferred = NasaApi.retrofitService.getAsteroidsAsync(startDate, endDate)
-            val response = deferred.await()
-            val json = JSONObject(response.body().toString())
-            val asteroidsList = parseAsteroidsJsonResult(json)
-            database.asteroidDao.insertAll(*asteroidsList.asDatabaseModel())
+            try {
+                var deferred = NasaApi.retrofitService.getAsteroidsAsync(startDate, endDate)
+                val response = deferred.await()
+                val json = JSONObject(response.body().toString())
+                val asteroidsList = parseAsteroidsJsonResult(json)
+                database.asteroidDao.insertAll(*asteroidsList.asDatabaseModel())
+                _fetchDataStatus.postValue(NasaApiStatus.SUCCESS)
+            }
+            catch (ex: java.lang.Exception){
+                _fetchDataStatus.postValue(NasaApiStatus.ERROR)
+            }
         }
     }
 
     suspend fun getPictureOfDay() {
         withContext(Dispatchers.IO) {
             try {
-                _status.postValue(NasaApiStatus.LOADING)
+                _podStatus.postValue(NasaApiStatus.LOADING)
                 var deferred = NasaApi.retrofitService.getPictureOfDayAsync()
                 val pictureOfDay = deferred.await()
                 _pod.postValue(pictureOfDay)
-                _status.postValue(NasaApiStatus.SUCCESS)
+                _podStatus.postValue(NasaApiStatus.SUCCESS)
             } catch (e: Exception) {
-                _status.postValue(NasaApiStatus.ERROR)
+                _podStatus.postValue(NasaApiStatus.ERROR)
                 e.printStackTrace()
             }
         }

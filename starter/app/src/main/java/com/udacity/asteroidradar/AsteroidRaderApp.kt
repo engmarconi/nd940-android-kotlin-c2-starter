@@ -2,12 +2,11 @@ package com.udacity.asteroidradar
 
 import android.app.Application
 import android.os.Build
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.udacity.asteroidradar.work.CleanerWorker
 import com.udacity.asteroidradar.work.CleanerWorker.Companion.WORK_NAME
+import com.udacity.asteroidradar.work.RefreshDataWorker
+import com.udacity.asteroidradar.work.RefreshDataWorker.Companion.DOWNLOAD_WORK_NAME
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,19 +28,29 @@ class AsteroidRadarApp : Application() {
 
     private fun setupRecurringWork() {
         val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
             .setRequiresBatteryNotLow(true)
             .setRequiresCharging(true)
             .build()
-        val repeatingRequest = PeriodicWorkRequestBuilder<CleanerWorker>(
+
+        val refreshRepeatingRequest = PeriodicWorkRequestBuilder<RefreshDataWorker>(
             1,
             TimeUnit.DAYS
+        ).setConstraints(constraints).build()
+
+        val cleanRepeatingRequest = PeriodicWorkRequestBuilder<CleanerWorker>(
+            1,
+            TimeUnit.DAYS
+        ).setConstraints(constraints).build()
+
+        WorkManager.getInstance().enqueueUniquePeriodicWork(
+            DOWNLOAD_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP,
+            refreshRepeatingRequest
         )
-            .setConstraints(constraints)
-            .build()
 
         WorkManager.getInstance().enqueueUniquePeriodicWork(
             WORK_NAME, ExistingPeriodicWorkPolicy.KEEP,
-            repeatingRequest
+            cleanRepeatingRequest
         )
     }
 }

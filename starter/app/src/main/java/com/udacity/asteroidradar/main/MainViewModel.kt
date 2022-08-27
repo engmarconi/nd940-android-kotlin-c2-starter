@@ -31,7 +31,8 @@ class MainViewModel(application: Application) : ViewModel() {
 
     private val database = AsteroidRadarDatabase.getInstance(application)
     private val repository = AsteroidRepository(database)
-    val status = repository.status
+    val fetchDataStatus = repository.fetchDataStatus
+    val podStatus = repository.podStatus
     val pod = repository.pod
 
     init {

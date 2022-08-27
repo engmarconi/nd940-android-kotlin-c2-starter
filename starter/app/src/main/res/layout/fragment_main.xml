@@ -29,6 +29,7 @@
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
+                android:contentDescription="@{viewModel.pod.title}"
                 app:imgSrcUrl="@{viewModel.pod.url}"
                 app:srcCompat="@drawable/placeholder_picture_of_day"/>
 
@@ -36,7 +37,7 @@
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
+                android:padding="@dimen/spacing_normal"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:textSize="20sp"
@@ -65,7 +66,7 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:visibility="gone"
-            app:nasaStatus="@{viewModel.status}"
+            app:nasaStatus="@{viewModel.podStatus}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

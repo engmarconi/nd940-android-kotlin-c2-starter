@@ -26,5 +26,5 @@ interface AsteroidDao {
     fun insertAll(vararg asteroids: AsteroidDbModel)
 
     @Query("delete from asteroid_table where close_approach_date < :date")
-    fun delete(date: Long)
+    suspend fun delete(date: Long)
 }
