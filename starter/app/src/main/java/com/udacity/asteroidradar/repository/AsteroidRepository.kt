@@ -2,16 +2,18 @@ package com.udacity.asteroidradar.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
-import com.udacity.asteroidradar.*
 import com.udacity.asteroidradar.api.NasaApi
 import com.udacity.asteroidradar.api.NasaApiStatus
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidDbModel
 import com.udacity.asteroidradar.database.AsteroidRadarDatabase
+import com.udacity.asteroidradar.helpers.convertDateLong
+import com.udacity.asteroidradar.helpers.convertDateString
+import com.udacity.asteroidradar.helpers.convertLongDateToString
+import com.udacity.asteroidradar.helpers.convertStringDateToLong
+import com.udacity.asteroidradar.models.Asteroid
+import com.udacity.asteroidradar.models.PictureOfDay
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.util.*

@@ -7,7 +7,7 @@
 
         <variable
             name="asteroid"
-            type="com.udacity.asteroidradar.Asteroid" />
+            type="com.udacity.asteroidradar.models.Asteroid" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +23,7 @@
             android:layout_marginEnd="@dimen/spacing_normal"
             android:layout_marginTop="8dp"
             android:text="@{asteroid.codename}"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryTextColor"
             android:textSize="17sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -38,7 +38,7 @@
             android:layout_marginTop="@dimen/view_margin"
             android:layout_marginBottom="@dimen/view_margin"
             android:text="@{asteroid.closeApproachDate}"
-            android:textColor="@color/white"
+            android:textColor="@color/primaryTextColor"
             android:textSize="14sp"
             android:textStyle="normal"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -7,7 +7,7 @@
 
         <variable
             name="asteroid"
-            type="com.udacity.asteroidradar.Asteroid" />
+            type="com.udacity.asteroidradar.models.Asteroid" />
     </data>
 
     <LinearLayout
@@ -97,7 +97,8 @@
                         android:id="@+id/help_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="8dp"
+                        android:padding="@dimen/spacing_small"
+                        android:contentDescription="@string/astronomical_unit_explanation_button"
                         app:srcCompat="@drawable/ic_help_circle" />
 
                 </LinearLayout>

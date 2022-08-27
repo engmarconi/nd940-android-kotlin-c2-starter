@@ -10,7 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.udacity.asteroidradar.api.NasaApiStatus
-import com.udacity.asteroidradar.main.AsteroidRecycleViewAdapter
+import com.udacity.asteroidradar.screens.main.AsteroidRecycleViewAdapter
+import com.udacity.asteroidradar.models.Asteroid
 
 @BindingAdapter("listData")
 fun bindListAsteroidsData(recyclerView: RecyclerView, list: List<Asteroid>?) {

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#010613</color>
-    <color name="colorPrimaryDark">#010613</color>
-    <color name="colorAccent">#FF8282</color>
+    <color name="primaryColor">#2d2d2d</color>
+    <color name="primaryLightColor">#565656</color>
+    <color name="primaryDarkColor">#020202</color>
+    <color name="primaryTextColor">#ffffff</color>
     <color name="app_background">#010613</color>
     <color name="default_text_color">#FFFFFF</color>
     <color name="text_grey">#D2D2D2</color>
     <color name="potentially_hazardous">#FF8282</color>
-    <color name="white">#FFF</color>
-    <color name="black">#000</color>
 </resources>
