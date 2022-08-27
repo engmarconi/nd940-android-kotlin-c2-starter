@@ -1,95 +1,79 @@
 package com.udacity.asteroidradar.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import android.app.Application
+import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.NasaApi
 import com.udacity.asteroidradar.api.NasaApiStatus
-import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import com.udacity.asteroidradar.convertDateLong
 import com.udacity.asteroidradar.convertDateString
+import com.udacity.asteroidradar.database.AsteroidRadarDatabase
+import com.udacity.asteroidradar.repository.AsteroidRepository
+import com.udacity.asteroidradar.repository.asDomainModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
-import java.lang.Exception
-import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.withContext
 import java.util.*
 
-enum class AsteroidFilter { TODAY, WEEK, LOCAL }
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : ViewModel() {
 
-    private val _status = MutableLiveData<NasaApiStatus>()
-    val status: LiveData<NasaApiStatus>
-        get() = _status
+    private var today = 0L
+    private var after7Days = 0L
 
     private val _asteroidList = MutableLiveData<List<Asteroid>>()
     val asteroidList: LiveData<List<Asteroid>>
-        get() = _asteroidList
-
-    private val _podUrl = MutableLiveData<String>()
-    val podUrl: LiveData<String>
-        get() = _podUrl
+       get() = _asteroidList
 
     private val _navigateToAsteroidDetails = MutableLiveData<Asteroid>()
     val navigateToAsteroidDetails: LiveData<Asteroid>
         get() = _navigateToAsteroidDetails
 
+    private val database = AsteroidRadarDatabase.getInstance(application)
+    private val repository = AsteroidRepository(database)
+    val status = repository.status
+    val pod = repository.pod
+
     init {
-        getAsteroidList(AsteroidFilter.WEEK)
+        var calendar = Calendar.getInstance()
+        today = convertDateLong(calendar.time)
+        calendar.add(Calendar.DATE, 7)
+        after7Days = convertDateLong(calendar.time)
+
+        refreshData()
         getPictureOfDay()
+        getToday()
     }
 
-    //////////////////////////////////////
-     fun getAsteroidList(filter: AsteroidFilter) {
+    private fun refreshData(){
         viewModelScope.launch {
-            try {
-                var startDate = ""
-                var endDate = ""
-                var calendar = Calendar.getInstance()
-                when (filter) {
-                    AsteroidFilter.TODAY -> {
-                        startDate = convertDateString(calendar.time)
-                        endDate = startDate
-                    }
-                    AsteroidFilter.WEEK -> {
-                        startDate = convertDateString(calendar.time)
-                        calendar.add(Calendar.DATE, 7)
-                        endDate = convertDateString(calendar.time)
-                    }
-                }
-                _status.value = NasaApiStatus.LOADING
-                if(filter != AsteroidFilter.LOCAL) {
-                    var deferred = NasaApi.retrofitService.getAsteroidsAsync(startDate, endDate)
-                    val response = deferred.await()
-                    val json = JSONObject(response.body().toString())
-                    _asteroidList.value = parseAsteroidsJsonResult(json)
-                    _status.value = NasaApiStatus.SUCCESS
-                }
-                else{
-                    _status.value = NasaApiStatus.SUCCESS
-                }
-            } catch (e: Exception) {
-                _status.value = NasaApiStatus.ERROR
-                e.printStackTrace()
-            }
+            repository.refreshAsteroidsData()
         }
     }
 
-     fun getPictureOfDay() {
+    private fun getPictureOfDay() {
         viewModelScope.launch {
-            try {
-                _status.value = NasaApiStatus.LOADING
-                var deferred = NasaApi.retrofitService.getPictureOfDayAsync()
-                val pictureOfDay = deferred.await()
-                _podUrl.value = pictureOfDay.url
-                _status.value = NasaApiStatus.SUCCESS
-            } catch (e: Exception) {
-                _status.value = NasaApiStatus.ERROR
-                e.printStackTrace()
-            }
+            repository.getPictureOfDay()
         }
     }
-    //////////////////////////////////////////////
+
+    fun getToday() {
+        viewModelScope.launch {
+            _asteroidList.value = repository.getTodayData()
+        }
+    }
+
+    fun getWeek() {
+        viewModelScope.launch {
+            _asteroidList.value = repository.getWeekData(today, after7Days)
+        }
+    }
+
+    fun getAll() {
+        viewModelScope.launch {
+            _asteroidList.value = repository.getAllSavedData()
+        }
+    }
 
     fun displayAsteroidDetails(asteroid: Asteroid) {
         _navigateToAsteroidDetails.value = asteroid
@@ -100,4 +84,13 @@ class MainViewModel : ViewModel() {
     }
 
 
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return MainViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unable to construct viewmodel")
+        }
+    }
 }

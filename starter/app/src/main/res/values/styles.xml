@@ -8,4 +8,14 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="title_Style">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/default_text_color</item>
+    </style>
+
+    <style name="subtitle_style">
+        <item name="android:layout_marginTop">@dimen/title_margin</item>
+        <item name="android:textColor">@color/default_text_color</item>
+    </style>
+
 </resources>

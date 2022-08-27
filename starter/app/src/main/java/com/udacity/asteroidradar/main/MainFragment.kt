@@ -13,7 +13,13 @@ import com.udacity.asteroidradar.databinding.FragmentMainBinding
 class MainFragment : Fragment() {
 
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this).get(MainViewModel::class.java)
+        val activity = requireNotNull(this.activity) {
+            "You can only access the viewModel after onViewCreated()"
+        }
+        ViewModelProvider(
+            this,
+            MainViewModel.Factory(activity.application)
+        ).get(MainViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -39,6 +45,7 @@ class MainFragment : Fragment() {
                 viewModel.displayAsteroidDetailsComplete()
             }
         })
+
         setHasOptionsMenu(true)
 
         return binding.root
@@ -51,10 +58,10 @@ class MainFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.show_week -> viewModel.getAsteroidList(AsteroidFilter.WEEK)
-            R.id.show_today -> viewModel.getAsteroidList(AsteroidFilter.TODAY)
+            R.id.show_today -> viewModel.getToday()
+            R.id.show_week -> viewModel.getWeek()
             else ->
-                viewModel.getAsteroidList(AsteroidFilter.LOCAL)
+                viewModel.getAll()
         }
         return true
     }

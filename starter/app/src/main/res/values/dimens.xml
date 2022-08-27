@@ -3,4 +3,5 @@
     <dimen name="input_margin">8dp</dimen>
     <dimen name="view_margin">8dp</dimen>
     <dimen name="layout_margin">16dp</dimen>
+    <dimen name="title_margin">4dp</dimen>
 </resources>
